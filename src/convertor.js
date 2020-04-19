@@ -1,25 +1,11 @@
-const mock = JSON.stringify({
-    items: [
-        {
-            id: 1,
-            descriptions: {
-                title: "foo"
-            }
-        }
-    ],
-    success: true,
-    foo: {
-        shit: "test"
-    }
-});
 const types = {
     array: "array",
     object: "object",
     undefined: "undefined",
-    any: {item: "any", collection: "any[]"},
-    number: {item: "number", collection: "number[]"},
-    string: {item: "string", collection: "string[]"},
-    boolean: {item: "boolean", collection: "boolean[]"},
+    any: { item: "any", collection: "any[]" },
+    number: { item: "number", collection: "number[]" },
+    string: { item: "string", collection: "string[]" },
+    boolean: { item: "boolean", collection: "boolean[]" },
     interface: {
         item: name => snakeToPaskalCase(name),
         collection: name => `${snakeToPaskalCase(name)}[]`
@@ -53,9 +39,12 @@ const getType = value => {
 };
 const isMixed = types => {
     let mixed = false;
-    types.reduce(
-        (prevValue, currentValue) => (mixed = getType(prevValue) !== getType(currentValue))
-    );
+    if(types.length) {
+        types.reduce(
+            (prevValue, currentValue) =>
+                (mixed = getType(prevValue) !== getType(currentValue))
+        );
+    }
     return mixed;
 };
 const hasChild = object => {
@@ -64,7 +53,6 @@ const hasChild = object => {
         contentTypes.includes(getType({})) || contentTypes.includes(getType([]))
     );
 };
-
 const typeMapper = (data, collection, key) => {
     if (getType(data) === "array") {
         if (isMixed(data)) {
@@ -72,22 +60,21 @@ const typeMapper = (data, collection, key) => {
         } else {
             const firstItem = data[0];
             if (getType(firstItem) === "object") {
-                collection[key] = types.interface.collection(key);
+                if (!collection[key]) {
+                    collection[key] = [];
+                }
+                typeMapper(data[0], collection[key], 0);
             } else {
                 collection[key] = types[getType(firstItem)].collection;
             }
         }
     } else if (getType(data) === "object") {
-        if (hasChild(data)) {
-            Object.keys(data).forEach(index => {
-                if (!collection[key]) {
-                    collection[key] = {};
-                }
-                typeMapper(data[index], collection[key], index);
-            });
-        } else {
-            collection[key] = types.interface.item(key);
-        }
+        Object.keys(data).forEach(index => {
+            if (!collection[key]) {
+                collection[key] = {};
+            }
+            typeMapper(data[index], collection[key], index);
+        });
     } else {
         collection[key] = getType(data);
     }
@@ -95,8 +82,8 @@ const typeMapper = (data, collection, key) => {
 
 const dtsGenerator = json => {
     const parsedJson = JSON.parse(json);
-    const modules = {};
-    typeMapper(parsedJson, modules, "root");
-    return modules;
+    const results = {};
+    typeMapper(parsedJson, results, "root");
+    return { results };
 };
 exports.dtsGenerator = dtsGenerator;
