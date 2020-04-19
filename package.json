@@ -21,5 +21,8 @@
   "bugs": {
     "url": "https://github.com/rezaerami/json2dts/issues"
   },
-  "homepage": "https://github.com/rezaerami/json2dts#readme"
+  "homepage": "https://github.com/rezaerami/json2dts#readme",
+  "devDependencies": {
+    "fs": "0.0.1-security"
+  }
 }
