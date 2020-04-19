@@ -1,0 +1,25 @@
+{
+  "name": "json2dts",
+  "version": "0.0.1",
+  "description": "converts json to d.ts",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "json2dts": "./bin/cli.js"
+  },
+  "engines": {
+    "node": ">=10"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rezaerami/json2dts.git"
+  },
+  "author": "Reza Erami",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rezaerami/json2dts/issues"
+  },
+  "homepage": "https://github.com/rezaerami/json2dts#readme"
+}
