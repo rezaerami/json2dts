@@ -1,3 +1,4 @@
+
 const types = {
     array: "array",
     object: "object",
@@ -39,7 +40,7 @@ const getType = value => {
 };
 const isMixed = types => {
     let mixed = false;
-    if(types.length) {
+    if (types.length) {
         types.reduce(
             (prevValue, currentValue) =>
                 (mixed = getType(prevValue) !== getType(currentValue))
@@ -54,21 +55,25 @@ const hasChild = object => {
     );
 };
 const typeMapper = (data, collection, key) => {
-    if (getType(data) === "array") {
-        if (isMixed(data)) {
+    if (getType(data) === getType([])) {
+        if (!data.length) {
             collection[key] = types.any.collection;
         } else {
-            const firstItem = data[0];
-            if (getType(firstItem) === "object") {
-                if (!collection[key]) {
-                    collection[key] = [];
-                }
-                typeMapper(data[0], collection[key], 0);
+            if (isMixed(data)) {
+                collection[key] = types.any.collection;
             } else {
-                collection[key] = types[getType(firstItem)].collection;
+                const firstItem = data[0];
+                if (getType(firstItem) === getType({})) {
+                    if (!collection[key]) {
+                        collection[key] = [];
+                    }
+                    typeMapper(data[0], collection[key], 0);
+                } else {
+                    collection[key] = types[getType(firstItem)].collection;
+                }
             }
         }
-    } else if (getType(data) === "object") {
+    } else if (getType(data) === getType({})) {
         Object.keys(data).forEach(index => {
             if (!collection[key]) {
                 collection[key] = {};
@@ -82,8 +87,29 @@ const typeMapper = (data, collection, key) => {
 
 const dtsGenerator = json => {
     const parsedJson = JSON.parse(json);
+    const rootKey = "root";
+
     const results = {};
-    typeMapper(parsedJson, results, "root");
-    return { results };
+    typeMapper(parsedJson, results, rootKey);
+
+    const modules = { ...results };
+    const interfaceMapper = (data, key) => {
+        if (getType(data) === getType([])) {
+            interfaceMapper(data[0], key);
+            modules[types.interface.item(key)] = data[0];
+            data[0] = types.interface.collection(key);
+        } else if (getType(data) === getType({})) {
+            Object.keys(data).forEach(index => {
+                interfaceMapper(data[index], index);
+                if (getType(data[index]) === getType({})) {
+                    modules[types.interface.item(index)] = data[index];
+                    data[index] = types.interface.collection(index);
+                }
+            });
+        }
+    };
+
+    interfaceMapper(results[rootKey], rootKey);
+    return modules;
 };
 exports.dtsGenerator = dtsGenerator;
