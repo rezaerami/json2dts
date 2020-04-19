@@ -1,10 +1,13 @@
 exports.dtsGenerator = json => {
-    const results = {};
-    const generator = data => {
+    const typeMapper = (data, results = {}) => {
         Object.keys(data).forEach(key => {
-            results[key] = typeof data[key]
-        })
+            if (data[key] && Array.isArray(data[key])) {
+                results[key] = typeMapper(data[key], results[key])
+            } else {
+                results[key] = typeof data[key];
+            }
+        });
+        return results
     };
-    generator(JSON.parse(json));
-    return results
+    return typeMapper(JSON.parse(json));
 };
