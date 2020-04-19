@@ -6,5 +6,4 @@ const [, , ...args] = process.argv;
 const filePath = args[0];
 
 const data = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8') : '';
-
-console.log(convertor.dtsGenerator(data))
+console.log(convertor.dtsGenerator(data));
